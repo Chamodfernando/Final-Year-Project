@@ -1,0 +1,49 @@
+[√] Flutter (Channel stable, 3.29.3, on Microsoft Windows [Version 10.0.26200.7840], locale en-US) [314ms]
+    • Flutter version 3.29.3 on channel stable at C:\src\flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision ea121f8859 (11 months ago), 2025-04-11 19:10:07 +0000
+    • Engine revision cf56914b32
+    • Dart version 3.7.2
+    • DevTools version 2.42.3
+
+[√] Windows Version (Windows 11 or higher, 25H2, 2009) [735ms]
+
+[!] Android toolchain - develop for Android devices (Android SDK version 35.0.1) [1,782ms]
+    • Android SDK at C:\Users\chamo\AppData\Local\Android\sdk
+    • Platform android-35, build-tools 35.0.1
+    • Java binary at: C:\Program Files\Android\Android Studio\jbr\bin\java
+      This is the JDK bundled with the latest Android Studio installation on this machine.
+      To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
+    • Java version OpenJDK Runtime Environment (build 21.0.5+-13047016-b750.29)
+    ! Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses
+
+[√] Chrome - develop for the web [82ms]
+    • Chrome at C:\Program Files\Google\Chrome\Application\chrome.exe
+
+[√] Visual Studio - develop Windows apps (Visual Studio Community 2022 17.13.2) [81ms]
+    • Visual Studio at C:\Program Files\Microsoft Visual Studio\2022\Community
+    • Visual Studio Community 2022 version 17.13.35825.156
+    • Windows 10 SDK version 10.0.22621.0
+
+[√] Android Studio (version 2024.3) [16ms]
+    • Android Studio at C:\Program Files\Android\Android Studio
+    • Flutter plugin can be installed from:
+       https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+       https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 21.0.5+-13047016-b750.29)
+
+[√] VS Code (version unknown) [14ms]
+    • VS Code at C:\Users\chamo\AppData\Local\Programs\Microsoft VS Code
+    • Flutter extension version 3.128.0
+    X Unable to determine VS Code version.
+
+[√] Connected device (3 available) [128ms]
+    • Windows (desktop) • windows • windows-x64    • Microsoft Windows [Version 10.0.26200.7840]
+    • Chrome (web)      • chrome  • web-javascript • Google Chrome 145.0.7632.117
+    • Edge (web)        • edge    • web-javascript • Microsoft Edge 145.0.3800.82
+
+[√] Network resources [423ms]
+    • All expected network resources are available.
+
+! Doctor found issues in 1 category.
