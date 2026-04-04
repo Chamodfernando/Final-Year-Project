@@ -1,6 +1,6 @@
-# ceylon_trails
+# Ceylon Trails (Final Year Project)
 
-A new Flutter project.
+A Flutter project designed to explore and experience the heritage of Sri Lanka.
 
 ## Getting Started
 
