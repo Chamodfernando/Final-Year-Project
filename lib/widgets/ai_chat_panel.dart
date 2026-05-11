@@ -54,12 +54,11 @@ class _AIChatPanelState extends State<AIChatPanel> {
     _scrollToBottom();
 
     try {
-      // Placeholder check for API Key
       if (!GeminiService.isApiKeySet) {
-         await Future.delayed(const Duration(seconds: 1));
-         setState(() {
+        await Future.delayed(const Duration(seconds: 1));
+        setState(() {
           _messages.add(ChatMessage(
-            text: "Guide: (API Key Missing) I'd love to tell you about ${widget.artifactTitle}, but I need my Gemini API key to be set up first! Please check the instructions.",
+            text: GeminiService.missingCompileTimeKeyUserMessage,
             isUser: false,
           ));
           _isLoading = false;
@@ -68,12 +67,11 @@ class _AIChatPanelState extends State<AIChatPanel> {
         return;
       }
 
-      String fullResponse = "";
+      var fullResponse = '';
       final responseStream = _geminiService.sendMessageStream(text);
-      
-      // Add an empty message to fill in
+
       setState(() {
-        _messages.add(ChatMessage(text: "", isUser: false));
+        _messages.add(ChatMessage(text: '', isUser: false));
       });
 
       await for (final chunk in responseStream) {
@@ -83,10 +81,17 @@ class _AIChatPanelState extends State<AIChatPanel> {
         });
         _scrollToBottom();
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Ceylon Trails Gemini error: $e');
+      debugPrint('$st');
       setState(() {
+        if (_messages.isNotEmpty &&
+            !_messages.last.isUser &&
+            _messages.last.text.isEmpty) {
+          _messages.removeLast();
+        }
         _messages.add(ChatMessage(
-          text: "Sorry, I encountered an error: $e",
+          text: GeminiService.userFacingErrorMessage(e),
           isUser: false,
         ));
       });
@@ -134,26 +139,31 @@ class _AIChatPanelState extends State<AIChatPanel> {
             ),
           ),
           
-          // Header
+          // Header (Expanded avoids overflow on long artifact titles)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.fromLTRB(12, 0, 4, 0),
             child: Row(
               children: [
                 const Icon(Icons.auto_awesome_rounded, color: Colors.amber, size: 22),
-                const SizedBox(width: 10),
-                Text(
-                  "Ask about ${widget.artifactTitle}",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Ask about ${widget.artifactTitle}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                const Spacer(),
                 IconButton(
+                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  padding: EdgeInsets.zero,
                   icon: const Icon(Icons.close, color: Colors.white70),
                   onPressed: () => Navigator.pop(context),
-                )
+                ),
               ],
             ),
           ),

@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.example.ceylon_trails"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
 
     // ✅ Use the NDK version required by firebase_core
     ndkVersion = "27.0.12077973"
@@ -28,8 +28,8 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.ceylon_trails"
 
-        // ✅ Bump minSdk up to 23 for Firebase
-        minSdk = 23
+        // ARCore plugins require at least API 24.
+        minSdk = 24
 
         // Keep using Flutter’s values for the rest
         targetSdk = flutter.targetSdkVersion

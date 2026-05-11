@@ -11,6 +11,7 @@ const Layout = () => {
     if (path === '/') return 'Dashboard';
     if (path === '/users') return 'User Management';
     if (path === '/locations') return 'Location Management';
+    if (path === '/artifacts') return 'Artifacts';
     return 'Admin Panel';
   };
 

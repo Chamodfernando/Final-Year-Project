@@ -28,13 +28,18 @@ const Locations = () => {
   const [artifactImageFile, setArtifactImageFile] = useState(null);
   const [artifactImagePreview, setArtifactImagePreview] = useState(null);
   const [artifactModelFile, setArtifactModelFile] = useState(null);
+  const [artifactModelArFile, setArtifactModelArFile] = useState(null);
   const [artifactFormData, setArtifactFormData] = useState({
     title: '',
     timePeriod: '',
     material: '',
     dimensions: '',
     history: '',
-    quickFacts: ''
+    quickFacts: '',
+    modelPathArClose: '',
+    modelPathArFar: '',
+    modelPathArWall: '',
+    modelPathArCeiling: ''
   });
 
   useEffect(() => {
@@ -149,13 +154,18 @@ const Locations = () => {
     setArtifactImageFile(null);
     setArtifactImagePreview(null);
     setArtifactModelFile(null);
+    setArtifactModelArFile(null);
     setArtifactFormData({
       title: '',
       timePeriod: '',
       material: '',
       dimensions: '',
       history: '',
-      quickFacts: ''
+      quickFacts: '',
+      modelPathArClose: '',
+      modelPathArFar: '',
+      modelPathArWall: '',
+      modelPathArCeiling: ''
     });
     setShowArtifactModal(true);
   };
@@ -168,6 +178,8 @@ const Locations = () => {
         const reader = new FileReader();
         reader.onloadend = () => setArtifactImagePreview(reader.result);
         reader.readAsDataURL(file);
+      } else if (type === 'modelAr') {
+        setArtifactModelArFile(file);
       } else {
         setArtifactModelFile(file);
       }
@@ -181,6 +193,7 @@ const Locations = () => {
     try {
       let imageUrl = '';
       let modelUrl = '';
+      let modelPathAr = '';
 
       if (artifactImageFile) {
         const fileName = `${Date.now()}_${artifactImageFile.name}`;
@@ -191,7 +204,14 @@ const Locations = () => {
         const fileName = `${Date.now()}_${artifactModelFile.name}`;
         modelUrl = await storageService.uploadFile(artifactModelFile, `artifacts/models/${fileName}`);
       }
+
+      if (artifactModelArFile) {
+        const fileName = `${Date.now()}_ar_${artifactModelArFile.name}`;
+        modelPathAr = await storageService.uploadFile(artifactModelArFile, `artifacts/models_ar/${fileName}`);
+      }
+
       // 3. Save to Firestore
+      const trimUrl = (v) => (typeof v === 'string' ? v.trim() : '');
       const artifactData = {
         title: artifactFormData.title,
         timePeriod: artifactFormData.timePeriod,
@@ -201,6 +221,19 @@ const Locations = () => {
         quickFacts: artifactFormData.quickFacts.split(',').map(f => f.trim()).filter(f => f !== ''),
         imagePath: imageUrl,
         modelPath: modelUrl,
+        ...(modelPathAr ? { modelPathAr } : {}),
+        ...(trimUrl(artifactFormData.modelPathArClose)
+          ? { modelPathArClose: trimUrl(artifactFormData.modelPathArClose) }
+          : {}),
+        ...(trimUrl(artifactFormData.modelPathArFar)
+          ? { modelPathArFar: trimUrl(artifactFormData.modelPathArFar) }
+          : {}),
+        ...(trimUrl(artifactFormData.modelPathArWall)
+          ? { modelPathArWall: trimUrl(artifactFormData.modelPathArWall) }
+          : {}),
+        ...(trimUrl(artifactFormData.modelPathArCeiling)
+          ? { modelPathArCeiling: trimUrl(artifactFormData.modelPathArCeiling) }
+          : {}),
         locationId: artifactLocation.id,
         siteName: artifactLocation.title,
         createdAt: new Date().toISOString()
@@ -424,13 +457,27 @@ const Locations = () => {
                   </div>
                   <div className="form-group">
                     <label className="label">3D Model (.glb)</label>
+                    <p className="field-help">Full-quality model for the in-app 3D viewer.</p>
                     <input
                       type="file"
+                      id="art-model-full"
                       accept=".glb"
                       onChange={(e) => handleArtifactFileChange(e, 'model')}
                       className="input"
                     />
                     {artifactModelFile && <p className="file-name-hint">{artifactModelFile.name}</p>}
+                  </div>
+                  <div className="form-group">
+                    <label className="label">AR model (.glb, lighter) — optional</label>
+                    <p className="field-help">Lower-poly / smaller file for ARCore. App uses this in AR when provided.</p>
+                    <input
+                      type="file"
+                      id="art-model-ar"
+                      accept=".glb"
+                      onChange={(e) => handleArtifactFileChange(e, 'modelAr')}
+                      className="input"
+                    />
+                    {artifactModelArFile && <p className="file-name-hint">{artifactModelArFile.name}</p>}
                   </div>
                 </div>
 
@@ -484,6 +531,58 @@ const Locations = () => {
                       value={artifactFormData.quickFacts}
                       onChange={(e) => setArtifactFormData({ ...artifactFormData, quickFacts: e.target.value })}
                       placeholder="e.g. 500 BC, Hand-carved, Sacred"
+                    />
+                  </div>
+                  <p className="field-help">
+                    Optional contextual AR models (URLs only). Upload the main AR .glb on the left; add hosted URLs here
+                    for close / far / wall / ceiling variants if you have them.
+                  </p>
+                  <div className="form-group">
+                    <label className="label">AR close (.glb URL)</label>
+                    <input
+                      type="url"
+                      className="input"
+                      value={artifactFormData.modelPathArClose}
+                      onChange={(e) =>
+                        setArtifactFormData({ ...artifactFormData, modelPathArClose: e.target.value })
+                      }
+                      placeholder="https://…"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="label">AR far (.glb URL)</label>
+                    <input
+                      type="url"
+                      className="input"
+                      value={artifactFormData.modelPathArFar}
+                      onChange={(e) =>
+                        setArtifactFormData({ ...artifactFormData, modelPathArFar: e.target.value })
+                      }
+                      placeholder="https://…"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="label">AR wall (.glb URL)</label>
+                    <input
+                      type="url"
+                      className="input"
+                      value={artifactFormData.modelPathArWall}
+                      onChange={(e) =>
+                        setArtifactFormData({ ...artifactFormData, modelPathArWall: e.target.value })
+                      }
+                      placeholder="https://…"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="label">AR ceiling (.glb URL)</label>
+                    <input
+                      type="url"
+                      className="input"
+                      value={artifactFormData.modelPathArCeiling}
+                      onChange={(e) =>
+                        setArtifactFormData({ ...artifactFormData, modelPathArCeiling: e.target.value })
+                      }
+                      placeholder="https://…"
                     />
                   </div>
                 </div>
@@ -550,6 +649,7 @@ const Locations = () => {
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .preview-box.small { height: 100px; }
         .file-name-hint { font-size: 11px; color: var(--primary); margin-top: 4px; }
+        .field-help { font-size: 12px; color: var(--text-muted); margin: 0 0 6px 0; line-height: 1.35; }
       `}</style>
     </div>
   );

@@ -1,0 +1,101 @@
+{
+  "@@locale": "en",
+  "appTitle": "Ceylon Trails",
+  "profileAndSettings": "Profile and Settings",
+  "profileSettingsTitle": "Profile & Settings",
+  "explorerSince": "Explorer since {year}",
+  "@explorerSince": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "savedPlaces": "Saved Places",
+  "savedArtifacts": "Saved Artifacts",
+  "appSettings": "App Settings",
+  "downloadOfflineContent": "Download Offline Content",
+  "voiceNarration": "Voice Narration",
+  "account": "Account",
+  "notifications": "Notifications",
+  "logOut": "Log Out",
+  "save": "Save",
+  "voiceNarrationSettings": "Voice Narration Settings",
+  "narrationLanguage": "Narration language",
+  "narrationSpeed": "Narration speed",
+  "appLanguage": "App Language",
+  "artifactDetails": "Artifact Details",
+  "viewInFull3D": "View in Full 3D",
+  "openArCamera": "Open AR Camera",
+  "ask": "ASK?",
+  "historyAndStory": "History & Story",
+  "quickFacts": "Quick Facts",
+  "places": "Places",
+  "map": "Map",
+  "saved": "Saved",
+  "comingSoon": "{label} coming soon",
+  "@comingSoon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "Settings",
+  "welcomeToApp": "Welcome to CEYLON TRAILS",
+  "discoverTagline": "Discover Sri Lanka's heritage, one trail at a time.",
+  "getStarted": "Get Started",
+  "continueAsGuest": "Continue as Guest",
+  "loginToApp": "Login to CEYLON TRAILS",
+  "pleaseEnterEmailPassword": "Please enter email and password",
+  "loginFailed": "Login failed",
+  "noUserFoundForEmail": "No user found for that email",
+  "incorrectPassword": "Incorrect password",
+  "pleaseEnterValidEmail": "Please enter a valid email",
+  "somethingWentWrongTryAgain": "Something went wrong. Try again.",
+  "welcomeBackSignIn": "Welcome back! Sign in to continue your journey.",
+  "email": "Email",
+  "password": "Password",
+  "enterYourEmail": "Enter your email",
+  "enterYourPassword": "Enter your password",
+  "forgotPassword": "Forgot Password?",
+  "login": "Login",
+  "dontHaveAccount": "Don't have an account?",
+  "signUp": "Sign Up",
+  "pleaseFillAllFields": "Please fill in all fields",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordAtLeast6": "Password should be at least 6 characters",
+  "signupFailed": "Sign up failed",
+  "emailAlreadyRegistered": "This email is already registered",
+  "invalidEmailAddress": "Invalid email address",
+  "passwordTooWeak": "Password is too weak",
+  "unexpectedError": "Unexpected error: {error}",
+  "@unexpectedError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createYourAccount": "Create Your Account",
+  "fullName": "Full Name",
+  "enterYourFullName": "Enter your full name",
+  "emailAddress": "Email Address",
+  "confirmPassword": "Confirm Password",
+  "confirmYourPassword": "Confirm your password",
+  "createAccount": "Create Account",
+  "alreadyHaveAccount": "Already have an account?",
+  "signIn": "Sign In",
+  "welcomeUser": "Welcome, {name}",
+  "@welcomeUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "narrationStopped": "Narration stopped",
+  "narrationPlaying": "Narration playing",
+  "narrationPaused": "Narration paused",
+  "noModelForAr": "3D model is required for AR mode."
+}

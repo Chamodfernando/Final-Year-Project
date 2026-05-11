@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'app_colors.dart';
+import 'dashboard_screen.dart';
 import 'login_screen.dart';
 
 class LoadingScreen extends StatelessWidget {
@@ -7,6 +12,7 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -22,7 +28,7 @@ class LoadingScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        'Welcome to CEYLON TRAILS',
+                        l10n.welcomeToApp,
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           fontSize: 12,
                           color: AppColors.subtleText,
@@ -59,10 +65,10 @@ class LoadingScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Discover Sri Lanka's heritage, one\ntrail at a time.",
+                        l10n.discoverTagline,
                         textAlign: TextAlign.center,
                         style:
-                        Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            Theme.of(context).textTheme.bodyMedium!.copyWith(
                           color: AppColors.subtleText,
                           fontSize: 14,
                         ),
@@ -72,7 +78,7 @@ class LoadingScreen extends StatelessWidget {
 
                   const Spacer(),
 
-                  const _BottomSection(),
+                  _BottomSection(l10n: l10n),
                 ],
               ),
             );
@@ -83,8 +89,17 @@ class LoadingScreen extends StatelessWidget {
   }
 }
 
-class _BottomSection extends StatelessWidget {
-  const _BottomSection();
+class _BottomSection extends StatefulWidget {
+  const _BottomSection({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  State<_BottomSection> createState() => _BottomSectionState();
+}
+
+class _BottomSectionState extends State<_BottomSection> {
+  bool _guestBusy = false;
 
   void _goToLogin(BuildContext context) {
     Navigator.of(context).push(
@@ -94,8 +109,78 @@ class _BottomSection extends StatelessWidget {
     );
   }
 
+  /// Firestore rules often require `request.auth != null`. Guest had no user on
+  /// physical devices → permission denied / empty reads; emulator sometimes had
+  /// a leftover session. Anonymous sign-in gives every guest a stable UID.
+  ///
+  /// [signInAnonymously] can hang on bad networks or iOS keychain / Play Services
+  /// issues — always time out and still open the dashboard.
+  Future<void> _goToDashboardAsGuest(BuildContext context) async {
+    if (_guestBusy) return;
+    setState(() => _guestBusy = true);
+    try {
+      final auth = FirebaseAuth.instance;
+      if (auth.currentUser == null) {
+        try {
+          await auth
+              .signInAnonymously()
+              .timeout(const Duration(seconds: 12));
+        } on FirebaseAuthException catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Anonymous guest sign-in failed (${e.code}). '
+                  'Enable Anonymous in Firebase Auth if lists stay empty. Opening app anyway…',
+                ),
+                duration: const Duration(seconds: 6),
+              ),
+            );
+          }
+        } on TimeoutException {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Sign-in is taking too long (network or Firebase). '
+                  'Opening the app anyway — try again or check Wi‑Fi.',
+                ),
+                duration: Duration(seconds: 5),
+              ),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Guest sign-in skipped: $e'),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+        }
+      }
+      if (!context.mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not continue as guest: $e'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _guestBusy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = widget.l10n;
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
@@ -106,7 +191,7 @@ class _BottomSection extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: () => _goToLogin(context),
+              onPressed: _guestBusy ? null : () => _goToLogin(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
                 elevation: 4,
@@ -115,8 +200,8 @@ class _BottomSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Text(
-                'Get Started',
+              child: Text(
+                l10n.getStarted,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -134,7 +219,7 @@ class _BottomSection extends StatelessWidget {
             width: 220,
             height: 48,
             child: OutlinedButton(
-              onPressed: () => _goToLogin(context),
+              onPressed: _guestBusy ? null : () => _goToDashboardAsGuest(context),
               style: OutlinedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
@@ -145,13 +230,22 @@ class _BottomSection extends StatelessWidget {
                   width: 1.2,
                 ),
               ),
-              child: Text(
-                'Continue as Guest',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: AppColors.primaryGreen,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: _guestBusy
+                  ? SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primaryGreen,
+                      ),
+                    )
+                  : Text(
+                      l10n.continueAsGuest,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: AppColors.primaryGreen,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
             ),
           ),
         ],

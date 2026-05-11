@@ -1,0 +1,101 @@
+{
+  "@@locale": "si",
+  "appTitle": "සිලෝන් ට්‍රේල්ස්",
+  "profileAndSettings": "පැතිකඩ සහ සැකසුම්",
+  "profileSettingsTitle": "පැතිකඩ සහ සැකසුම්",
+  "explorerSince": "{year} සිට ගවේෂකයෙක්",
+  "@explorerSince": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "savedPlaces": "සුරකින ලද ස්ථාන",
+  "savedArtifacts": "සුරකින ලද පුරාවස්තු",
+  "appSettings": "යෙදුම් සැකසුම්",
+  "downloadOfflineContent": "අන්තර්ජාල නොමැති අන්තර්ගත බාගත කිරීම",
+  "voiceNarration": "හඬ කථනය",
+  "account": "ගිණුම",
+  "notifications": "දැනුම්දීම්",
+  "logOut": "ඉවත් වන්න",
+  "save": "සුරකින්න",
+  "voiceNarrationSettings": "හඬ කථන සැකසුම්",
+  "narrationLanguage": "කථන භාෂාව",
+  "narrationSpeed": "කථන වේගය",
+  "appLanguage": "යෙදුම් භාෂාව",
+  "artifactDetails": "පුරාවස්තු විස්තර",
+  "viewInFull3D": "පූර්ණ 3D දසුන",
+  "openArCamera": "AR කැමරාව විවෘත කරන්න",
+  "ask": "අසන්න?",
+  "historyAndStory": "ඉතිහාසය සහ කතාව",
+  "quickFacts": "ඉක්මන් කරුණු",
+  "places": "ස්ථාන",
+  "map": "සිතියම",
+  "saved": "සුරකින ලද",
+  "comingSoon": "{label} ඉක්මනින්",
+  "@comingSoon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "සැකසුම්",
+  "welcomeToApp": "සිලෝන් ට්‍රේල්ස් වෙත සාදරයෙන් පිළිගනිමු",
+  "discoverTagline": "ශ්‍රී ලංකාවේ උරුමය, එක් මංපෙතක් මඟින් සොයන්න.",
+  "getStarted": "ආරම්භ කරන්න",
+  "continueAsGuest": "අමුත්තෙකු ලෙස ඉදිරියට යන්න",
+  "loginToApp": "සිලෝන් ට්‍රේල්ස් වෙත පිවිසෙන්න",
+  "pleaseEnterEmailPassword": "කරුණාකර ඊමේල් සහ මුරපදය ඇතුල් කරන්න",
+  "loginFailed": "පිවිසුම අසාර්ථකයි",
+  "noUserFoundForEmail": "එම ඊමේල් සඳහා පරිශීලකයෙකු හමු නොවීය",
+  "incorrectPassword": "වැරදි මුරපදය",
+  "pleaseEnterValidEmail": "වලංගු ඊමේල් ලිපිනයක් ඇතුල් කරන්න",
+  "somethingWentWrongTryAgain": "යම් දෝෂයක් ඇතිවිය. නැවත උත්සාහ කරන්න.",
+  "welcomeBackSignIn": "නැවත සාදරයෙන් පිළිගනිමු! ඔබගේ ගමන දිගටම ගෙනයෑමට පිවිසෙන්න.",
+  "email": "ඊමේල්",
+  "password": "මුරපදය",
+  "enterYourEmail": "ඔබගේ ඊමේල් ඇතුල් කරන්න",
+  "enterYourPassword": "ඔබගේ මුරපදය ඇතුල් කරන්න",
+  "forgotPassword": "මුරපදය අමතකද?",
+  "login": "පිවිසෙන්න",
+  "dontHaveAccount": "ගිණුමක් නොමැතිද?",
+  "signUp": "ලියාපදිංචි වන්න",
+  "pleaseFillAllFields": "කරුණාකර සියලු ක්ෂේත්‍ර පුරවන්න",
+  "passwordsDoNotMatch": "මුරපද ගැලපෙන්නේ නැත",
+  "passwordAtLeast6": "මුරපදය අවම වශයෙන් අක්ෂර 6 ක් විය යුතුය",
+  "signupFailed": "ලියාපදිංචිය අසාර්ථකයි",
+  "emailAlreadyRegistered": "මෙම ඊමේල් ලිපිනය දැනටමත් ලියාපදිංචි කර ඇත",
+  "invalidEmailAddress": "වලංගු නොවන ඊමේල් ලිපිනය",
+  "passwordTooWeak": "මුරපදය දුර්වලයි",
+  "unexpectedError": "අපේක්ෂිත නොවන දෝෂයක්: {error}",
+  "@unexpectedError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createYourAccount": "ඔබගේ ගිණුම සාදන්න",
+  "fullName": "සම්පූර්ණ නම",
+  "enterYourFullName": "ඔබගේ සම්පූර්ණ නම ඇතුල් කරන්න",
+  "emailAddress": "ඊමේල් ලිපිනය",
+  "confirmPassword": "මුරපදය තහවුරු කරන්න",
+  "confirmYourPassword": "ඔබගේ මුරපදය තහවුරු කරන්න",
+  "createAccount": "ගිණුම සාදන්න",
+  "alreadyHaveAccount": "දැනටමත් ගිණුමක් තිබේද?",
+  "signIn": "පිවිසෙන්න",
+  "welcomeUser": "සාදරයෙන් පිළිගනිමු, {name}",
+  "@welcomeUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "narrationStopped": "කථනය නවතා ඇත",
+  "narrationPlaying": "කථනය ප්‍රදර්ශනය වේ",
+  "narrationPaused": "කථනය තාවකාලිකව නවතා ඇත",
+  "noModelForAr": "AR මාදිලිය සඳහා 3D ආකෘතියක් අවශ්‍යයි."
+}

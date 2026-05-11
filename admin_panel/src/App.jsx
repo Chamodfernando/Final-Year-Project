@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Locations from './pages/Locations';
+import Artifacts from './pages/Artifacts';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="locations" element={<Locations />} />
+          <Route path="artifacts" element={<Artifacts />} />
         </Route>
       </Routes>
     </BrowserRouter>

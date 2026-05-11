@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'app_colors.dart';
 import 'dashboard_screen.dart';
@@ -32,6 +33,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _handleSignup() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -40,22 +42,22 @@ class _SignupScreenState extends State<SignupScreen> {
     // ---------------- basic validation ----------------
     if (name.isEmpty || email.isEmpty || password.isEmpty || confirm.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text(l10n.pleaseFillAllFields)),
       );
       return;
     }
 
     if (password != confirm) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+        SnackBar(content: Text(l10n.passwordsDoNotMatch)),
       );
       return;
     }
 
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password should be at least 6 characters'),
+        SnackBar(
+          content: Text(l10n.passwordAtLeast6),
         ),
       );
       return;
@@ -74,7 +76,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       final user = cred.user;
       if (user == null) {
-        throw Exception('User is null after sign up');
+        throw Exception(l10n.signupFailed);
       }
 
       // 2) Set displayName (so profile screen can use it)
@@ -86,7 +88,7 @@ class _SignupScreenState extends State<SignupScreen> {
       setState(() => _isSubmitting = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Welcome, $name')),
+        SnackBar(content: Text(l10n.welcomeUser(name))),
       );
 
       // 4) Go straight to Dashboard, replacing signup screen
@@ -96,13 +98,13 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
     } on FirebaseAuthException catch (e) {
-      String message = 'Sign up failed';
+      String message = l10n.signupFailed;
       if (e.code == 'email-already-in-use') {
-        message = 'This email is already registered';
+        message = l10n.emailAlreadyRegistered;
       } else if (e.code == 'invalid-email') {
-        message = 'Invalid email address';
+        message = l10n.invalidEmailAddress;
       } else if (e.code == 'weak-password') {
-        message = 'Password is too weak';
+        message = l10n.passwordTooWeak;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error: $e')),
+        SnackBar(content: Text(l10n.unexpectedError('$e'))),
       );
     } finally {
       if (mounted) {
@@ -121,6 +123,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.dashboardBackground,
       body: SafeArea(
@@ -168,8 +171,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   const SizedBox(height: 28),
 
-                  const Text(
-                    'Create Your Account',
+                  Text(
+                    l10n.createYourAccount,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
@@ -180,30 +183,30 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 24),
 
                   // Full name
-                  const _FieldLabel('Full Name'),
+                  _FieldLabel(l10n.fullName),
                   const SizedBox(height: 6),
                   _OutlinedInput(
                     controller: _nameController,
-                    hintText: 'Enter your full name',
+                    hintText: l10n.enterYourFullName,
                   ),
                   const SizedBox(height: 16),
 
                   // Email
-                  const _FieldLabel('Email Address'),
+                  _FieldLabel(l10n.emailAddress),
                   const SizedBox(height: 6),
                   _OutlinedInput(
                     controller: _emailController,
-                    hintText: 'Enter your email',
+                    hintText: l10n.enterYourEmail,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
 
                   // Password
-                  const _FieldLabel('Password'),
+                  _FieldLabel(l10n.password),
                   const SizedBox(height: 6),
                   _OutlinedInput(
                     controller: _passwordController,
-                    hintText: 'Enter your password',
+                    hintText: l10n.enterYourPassword,
                     obscureText: !_showPassword,
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -223,11 +226,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 16),
 
                   // Confirm password
-                  const _FieldLabel('Confirm Password'),
+                  _FieldLabel(l10n.confirmPassword),
                   const SizedBox(height: 6),
                   _OutlinedInput(
                     controller: _confirmPasswordController,
-                    hintText: 'Confirm your password',
+                    hintText: l10n.confirmYourPassword,
                     obscureText: !_showConfirmPassword,
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -269,8 +272,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                          : const Text(
-                        'Create Account',
+                          : Text(
+                        l10n.createAccount,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -292,14 +295,14 @@ class _SignupScreenState extends State<SignupScreen> {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: 'Already have an account? ',
+                              text: '${l10n.alreadyHaveAccount} ',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.subtleText.withOpacity(0.9),
                               ),
                             ),
-                            const TextSpan(
-                              text: 'Sign In',
+                            TextSpan(
+                              text: l10n.signIn,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,

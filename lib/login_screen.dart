@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'app_colors.dart';
 import 'signup_screen.dart';
@@ -29,12 +30,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+    final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
+        SnackBar(content: Text(l10n.pleaseEnterEmailPassword)),
       );
       return;
     }
@@ -55,20 +57,20 @@ class _LoginScreenState extends State<LoginScreen> {
             (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      String message = 'Login failed';
+      String message = l10n.loginFailed;
       if (e.code == 'user-not-found') {
-        message = 'No user found for that email';
+        message = l10n.noUserFoundForEmail;
       } else if (e.code == 'wrong-password') {
-        message = 'Incorrect password';
+        message = l10n.incorrectPassword;
       } else if (e.code == 'invalid-email') {
-        message = 'Please enter a valid email';
+        message = l10n.pleaseEnterValidEmail;
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Something went wrong. Try again.')),
+        SnackBar(content: Text(l10n.somethingWentWrongTryAgain)),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -77,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -112,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Text(
-                    'Login to CEYLON TRAILS',
+                    l10n.loginToApp,
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                       fontSize: 12,
                       color: Colors.white.withOpacity(0.9),
@@ -125,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: _LoginCard(
+                        l10n: l10n,
                         emailController: _emailController,
                         passwordController: _passwordController,
                         isLoading: _isLoading,
@@ -143,12 +147,14 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class _LoginCard extends StatelessWidget {
+  final AppLocalizations l10n;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final bool isLoading;
   final VoidCallback onLogin;
 
   const _LoginCard({
+    required this.l10n,
     required this.emailController,
     required this.passwordController,
     required this.isLoading,
@@ -187,7 +193,7 @@ class _LoginCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Welcome back! Sign in to continue your\njourney.',
+                l10n.welcomeBackSignIn,
                 style: TextStyle(
                   fontSize: 13,
                   height: 1.4,
@@ -198,7 +204,7 @@ class _LoginCard extends StatelessWidget {
 
               // Email
               Text(
-                'Email',
+                l10n.email,
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.white.withOpacity(0.9),
@@ -208,14 +214,14 @@ class _LoginCard extends StatelessWidget {
               const SizedBox(height: 8),
               _LoginTextField(
                 controller: emailController,
-                hintText: 'Enter your email',
+                hintText: l10n.enterYourEmail,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
 
               // Password
               Text(
-                'Password',
+                l10n.password,
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.white.withOpacity(0.9),
@@ -225,7 +231,7 @@ class _LoginCard extends StatelessWidget {
               const SizedBox(height: 8),
               _LoginTextField(
                 controller: passwordController,
-                hintText: 'Enter your password',
+                hintText: l10n.enterYourPassword,
                 obscureText: true,
               ),
               const SizedBox(height: 8),
@@ -247,7 +253,7 @@ class _LoginCard extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Forgot Password?',
+                    l10n.forgotPassword,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -283,8 +289,8 @@ class _LoginCard extends StatelessWidget {
                       AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                      : const Text(
-                    'Login',
+                      : Text(
+                    l10n.login,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -302,7 +308,7 @@ class _LoginCard extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: "Don't have an account? ",
+                        text: "${l10n.dontHaveAccount} ",
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.white.withOpacity(0.9),
@@ -319,8 +325,8 @@ class _LoginCard extends StatelessWidget {
                               ),
                             );
                           },
-                          child: const Text(
-                            'Sign Up',
+                          child: Text(
+                            l10n.signUp,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

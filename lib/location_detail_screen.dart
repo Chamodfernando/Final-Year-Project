@@ -231,70 +231,129 @@ class LocationDetailScreen extends StatelessWidget {
 
                           const SizedBox(height: 20),
 
-                          // Artifacts section
-                          const Text(
-                            'Artifacts from this Site',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          SizedBox(
-                            height: 200,
-                            child: StreamBuilder<List<model.Artifact>>(
-                              stream: FirestoreService().streamArtifacts(id),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const Center(child: CircularProgressIndicator());
-                                }
-                                if (snapshot.hasError) {
-                                  return Center(child: Text('Error: ${snapshot.error}'));
-                                }
-                                final artifacts = snapshot.data ?? [];
-
-                                if (artifacts.isEmpty) {
-                                  return Center(
-                                    child: Text(
-                                      'No artifacts found for this site.',
-                                      style: TextStyle(color: AppColors.subtleText),
+                          // Artifacts section (single Firestore subscription)
+                          StreamBuilder<List<model.Artifact>>(
+                            stream: FirestoreService().streamArtifacts(id),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Artifacts from this Site',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
                                     ),
-                                  );
-                                }
-
-                                return ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: artifacts.length,
-                                  itemBuilder: (context, index) {
-                                    final art = artifacts[index];
-                                    return _ArtifactCard(
-                                      imagePath: art.imagePath,
-                                      title: art.title,
-                                      subtitle: art.timePeriod,
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => ArtifactDetailScreen(
-                                              title: art.title,
-                                              siteName: art.siteName,
-                                              imagePath: art.imagePath,
-                                              timePeriod: art.timePeriod,
-                                              material: art.material,
-                                              dimensions: art.dimensions,
-                                              history: art.history,
-                                              quickFacts: art.quickFacts,
-                                              modelPath: art.modelPath,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
+                                    SizedBox(height: 12),
+                                    SizedBox(
+                                      height: 200,
+                                      child: Center(child: CircularProgressIndicator()),
+                                    ),
+                                  ],
                                 );
-                              },
-                            ),
+                              }
+                              if (snapshot.hasError) {
+                                return Text(
+                                  'Error loading artifacts: ${snapshot.error}',
+                                  style: TextStyle(color: AppColors.subtleText),
+                                );
+                              }
+                              final artifacts = snapshot.data ?? [];
+                              final n = artifacts.length;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      const Text(
+                                        'Artifacts from this Site',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      if (n > 0) ...[
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '($n)',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.subtleText,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  if (n > 1) ...[
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Swipe sideways to see all artifacts',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.subtleText,
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    height: 200,
+                                    child: artifacts.isEmpty
+                                        ? Center(
+                                            child: Text(
+                                              'No artifacts found for this site.',
+                                              style: TextStyle(color: AppColors.subtleText),
+                                            ),
+                                          )
+                                        : ListView.separated(
+                                            scrollDirection: Axis.horizontal,
+                                            padding: const EdgeInsets.only(right: 16),
+                                            physics: const BouncingScrollPhysics(),
+                                            itemCount: artifacts.length,
+                                            separatorBuilder: (_, __) =>
+                                                const SizedBox(width: 12),
+                                            itemBuilder: (context, index) {
+                                              final art = artifacts[index];
+                                              return _ArtifactCard(
+                                                imagePath: art.imagePath,
+                                                title: art.title,
+                                                subtitle: art.timePeriod,
+                                                onTap: () {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                      builder: (_) => ArtifactDetailScreen(
+                                                        title: art.title,
+                                                        siteName: art.siteName,
+                                                        imagePath: art.imagePath,
+                                                        timePeriod: art.timePeriod,
+                                                        material: art.material,
+                                                        dimensions: art.dimensions,
+                                                        history: art.history,
+                                                        quickFacts: art.quickFacts,
+                                                        modelPath: art.modelPath,
+                                                        modelPathAr: art.modelPathAr,
+                                                        modelPathArClose: art.modelPathArClose,
+                                                        modelPathArFar: art.modelPathArFar,
+                                                        modelPathArWall: art.modelPathArWall,
+                                                        modelPathArCeiling: art.modelPathArCeiling,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),

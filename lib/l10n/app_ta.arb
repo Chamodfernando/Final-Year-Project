@@ -1,0 +1,101 @@
+{
+  "@@locale": "ta",
+  "appTitle": "செய்லன் ட்ரெயில்ஸ்",
+  "profileAndSettings": "சுயவிவரம் மற்றும் அமைப்புகள்",
+  "profileSettingsTitle": "சுயவிவரம் மற்றும் அமைப்புகள்",
+  "explorerSince": "{year} முதல் ஆய்வாளர்",
+  "@explorerSince": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "savedPlaces": "சேமிக்கப்பட்ட இடங்கள்",
+  "savedArtifacts": "சேமிக்கப்பட்ட பழமையான பொருட்கள்",
+  "appSettings": "ஆப் அமைப்புகள்",
+  "downloadOfflineContent": "ஆஃப்லைன் உள்ளடக்கம் பதிவிறக்கம்",
+  "voiceNarration": "குரல் விளக்கம்",
+  "account": "கணக்கு",
+  "notifications": "அறிவிப்புகள்",
+  "logOut": "வெளியேறு",
+  "save": "சேமி",
+  "voiceNarrationSettings": "குரல் விளக்க அமைப்புகள்",
+  "narrationLanguage": "விளக்க மொழி",
+  "narrationSpeed": "விளக்க வேகம்",
+  "appLanguage": "ஆப் மொழி",
+  "artifactDetails": "பொருள் விவரங்கள்",
+  "viewInFull3D": "முழு 3D காட்சி",
+  "openArCamera": "AR கேமரா திற",
+  "ask": "கேள்?",
+  "historyAndStory": "வரலாறு மற்றும் கதை",
+  "quickFacts": "விரைவு தகவல்கள்",
+  "places": "இடங்கள்",
+  "map": "வரைபடம்",
+  "saved": "சேமிப்பு",
+  "comingSoon": "{label} விரைவில்",
+  "@comingSoon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "அமைப்புகள்",
+  "welcomeToApp": "செய்லன் ட்ரெயில்ஸுக்கு வரவேற்கிறோம்",
+  "discoverTagline": "இலங்கையின் பாரம்பரியத்தை, ஒரு பாதை ஒன்றாக கண்டறியுங்கள்.",
+  "getStarted": "தொடங்குங்கள்",
+  "continueAsGuest": "விருந்தினராக தொடரவும்",
+  "loginToApp": "செய்லன் ட்ரெயில்ஸில் உள்நுழையுங்கள்",
+  "pleaseEnterEmailPassword": "மின்னஞ்சல் மற்றும் கடவுச்சொல்லை உள்ளிடவும்",
+  "loginFailed": "உள்நுழைவு தோல்வி",
+  "noUserFoundForEmail": "இந்த மின்னஞ்சலுக்கு பயனர் இல்லை",
+  "incorrectPassword": "தவறான கடவுச்சொல்",
+  "pleaseEnterValidEmail": "செல்லுபடியாகும் மின்னஞ்சல் முகவரியை உள்ளிடவும்",
+  "somethingWentWrongTryAgain": "ஏதோ தவறு ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
+  "welcomeBackSignIn": "மீண்டும் வரவேற்கிறோம்! உங்கள் பயணத்தைத் தொடர உள்நுழையவும்.",
+  "email": "மின்னஞ்சல்",
+  "password": "கடவுச்சொல்",
+  "enterYourEmail": "உங்கள் மின்னஞ்சலை உள்ளிடவும்",
+  "enterYourPassword": "உங்கள் கடவுச்சொல்லை உள்ளிடவும்",
+  "forgotPassword": "கடவுச்சொல் மறந்துவிட்டதா?",
+  "login": "உள்நுழை",
+  "dontHaveAccount": "உங்களிடம் கணக்கு இல்லையா?",
+  "signUp": "பதிவு செய்யுங்கள்",
+  "pleaseFillAllFields": "அனைத்து புலங்களையும் நிரப்பவும்",
+  "passwordsDoNotMatch": "கடவுச்சொற்கள் பொருந்தவில்லை",
+  "passwordAtLeast6": "கடவுச்சொல் குறைந்தபட்சம் 6 எழுத்துகள் இருக்க வேண்டும்",
+  "signupFailed": "பதிவு தோல்வி",
+  "emailAlreadyRegistered": "இந்த மின்னஞ்சல் ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது",
+  "invalidEmailAddress": "தவறான மின்னஞ்சல் முகவரி",
+  "passwordTooWeak": "கடவுச்சொல் பலவீனமாக உள்ளது",
+  "unexpectedError": "எதிர்பாராத பிழை: {error}",
+  "@unexpectedError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createYourAccount": "உங்கள் கணக்கை உருவாக்குங்கள்",
+  "fullName": "முழுப்பெயர்",
+  "enterYourFullName": "உங்கள் முழுப்பெயரை உள்ளிடவும்",
+  "emailAddress": "மின்னஞ்சல் முகவரி",
+  "confirmPassword": "கடவுச்சொல்லை உறுதிப்படுத்தவும்",
+  "confirmYourPassword": "உங்கள் கடவுச்சொல்லை உறுதிப்படுத்தவும்",
+  "createAccount": "கணக்கு உருவாக்கு",
+  "alreadyHaveAccount": "ஏற்கனவே கணக்கு உள்ளதா?",
+  "signIn": "உள்நுழை",
+  "welcomeUser": "வரவேற்கிறோம், {name}",
+  "@welcomeUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "narrationStopped": "விளக்கம் நிறுத்தப்பட்டது",
+  "narrationPlaying": "விளக்கம் ஓடுகிறது",
+  "narrationPaused": "விளக்கம் இடைநிறுத்தப்பட்டது",
+  "noModelForAr": "AR முறைக்கு 3D மாதிரி தேவை."
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'app_colors.dart';
 import 'location_detail_screen.dart';
@@ -58,6 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -125,10 +127,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
-                  tabs: const [
-                    Tab(text: 'Places'),
-                    Tab(text: 'Map'),
-                    Tab(text: 'Saved'),
+                  tabs: [
+                    Tab(text: l10n.places),
+                    Tab(text: l10n.map),
+                    Tab(text: l10n.saved),
                   ],
                 ),
               ),
@@ -147,7 +149,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         _mapController = controller;
                       },
                     ),
-                    const _PlaceholderTab(label: 'Saved'),
+                    _PlaceholderTab(label: l10n.savedPlaces),
                   ],
                 ),
               ),
@@ -309,12 +311,54 @@ class _PlacesTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          final err = snapshot.error.toString();
+          final isPerm = err.contains('permission-denied') ||
+              err.contains('PERMISSION_DENIED');
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Could not load places',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  SelectableText(
+                    err,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                  if (isPerm) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Firestore blocked reads (often missing auth). '
+                      'Use Continue as Guest (signs in anonymously) or sign in. '
+                      'In Firebase Console → Authentication, enable Anonymous.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
         }
         final places = snapshot.data ?? [];
 
         if (places.isEmpty) {
-          return const Center(child: Text('No locations found. Add some in the Admin Panel!'));
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'No locations found. Add some in the Admin Panel.\n\n'
+                'If data exists but another device shows it: check Wi‑Fi, then '
+                'Android Settings → Apps → Ceylon Trails → Storage → Clear cache.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
         }
 
         return ListView.builder(
@@ -550,9 +594,10 @@ class _PlaceholderTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Text(
-        '$label coming soon',
+        l10n.comingSoon(label),
         style: TextStyle(
           color: AppColors.subtleText.withOpacity(0.8),
           fontSize: 14,
@@ -569,6 +614,7 @@ class _DashboardDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Drawer(
       backgroundColor: AppColors.background,
       child: SafeArea(
@@ -613,7 +659,7 @@ class _DashboardDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.bookmark_outline,
                   color: AppColors.primaryGreen),
-              title: const Text('Saved Places'),
+              title: Text(l10n.savedPlaces),
               onTap: () {
                 Navigator.of(context).pop();
                 // TODO: navigate to Saved Places
@@ -622,7 +668,7 @@ class _DashboardDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.inventory_2_outlined,
                   color: AppColors.primaryGreen),
-              title: const Text('Saved Artifacts'),
+              title: Text(l10n.savedArtifacts),
               onTap: () {
                 Navigator.of(context).pop();
               },
@@ -630,7 +676,7 @@ class _DashboardDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.settings_outlined,
                   color: AppColors.primaryGreen),
-              title: const Text('Settings'),
+              title: Text(l10n.settings),
               onTap: () {
                 Navigator.of(context).pop();
               },
@@ -640,8 +686,8 @@ class _DashboardDrawer extends StatelessWidget {
             ListTile(
               leading:
               const Icon(Icons.logout, color: Colors.redAccent, size: 22),
-              title: const Text(
-                'Log Out',
+              title: Text(
+                l10n.logOut,
                 style: TextStyle(color: Colors.redAccent),
               ),
               onTap: () {
@@ -675,7 +721,7 @@ String _historyTextFor(String title) {
           'landmarks, especially when trains curve across its dramatic arches.';
   } else if (title == 'Temple of the Tooth Relic') {
     return
-      'The Temple of the Tooth Relic (Sri Dalada Maligawa) in Kandy houses what '
+      'The Temple of the Tooth Relic (Sri Maligawa) in Kandy houses what '
           'is believed to be the sacred tooth relic of the Buddha. The temple '
           'complex is part of a royal palace and is one of the most important '
           'Buddhist pilgrimage sites in the world, with daily rituals and annual '

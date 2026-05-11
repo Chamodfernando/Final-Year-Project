@@ -19,16 +19,38 @@ class Location {
     required this.rating,
   });
 
+  static String _str(dynamic v, [String fallback = '']) {
+    if (v == null) return fallback;
+    if (v is String) return v;
+    return v.toString();
+  }
+
+  static List<String> _tags(dynamic v) {
+    if (v == null) return [];
+    if (v is List) {
+      return v.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+    }
+    final one = v.toString().trim();
+    return one.isEmpty ? [] : [one];
+  }
+
+  static double _rating(dynamic v) {
+    if (v == null) return 0;
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v.trim()) ?? 0;
+    return 0;
+  }
+
   factory Location.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return Location(
       id: doc.id,
-      title: data['title'] ?? '',
-      district: data['district'] ?? '',
-      description: data['description'] ?? '',
-      imagePath: data['imagePath'] ?? '',
-      tags: List<String>.from(data['tags'] ?? []),
-      rating: (data['rating'] ?? 0.0).toDouble(),
+      title: _str(data['title']),
+      district: _str(data['district']),
+      description: _str(data['description']),
+      imagePath: _str(data['imagePath']),
+      tags: _tags(data['tags']),
+      rating: _rating(data['rating']),
     );
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, MapPin, Landmark, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, MapPin, Box, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -7,6 +7,7 @@ const Sidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'Users', path: '/users' },
     { icon: MapPin, label: 'Locations', path: '/locations' },
+    { icon: Box, label: 'Artifacts', path: '/artifacts' },
   ];
 
   return (

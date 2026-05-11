@@ -1,23 +1,129 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/location.dart';
 import '../models/artifact.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Stream of all locations
+  /// All locations. Skips malformed docs so one bad row does not empty the list.
   Stream<List<Location>> streamLocations() {
-    return _db.collection('locations').snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Location.fromFirestore(doc)).toList());
+    return _db.collection('locations').snapshots().map((snapshot) {
+      final list = <Location>[];
+      for (final doc in snapshot.docs) {
+        try {
+          list.add(Location.fromFirestore(doc));
+        } catch (e, st) {
+          debugPrint('FirestoreService: skip location ${doc.id}: $e\n$st');
+        }
+      }
+      if (kDebugMode) {
+        debugPrint(
+          'Firestore locations snapshot: ${snapshot.docs.length} docs, '
+          '${list.length} parsed',
+        );
+      }
+      return list;
+    });
   }
 
-  // Stream of artifacts for a specific location
+  /// Artifacts for [locationId] (Firestore **locations** document id).
+  ///
+  /// Merges two queries so artifacts match whether `locationId` was saved as a **string**
+  /// or a **DocumentReference** to `locations/{id}` (common cause of “missing” rows).
   Stream<List<Artifact>> streamArtifacts(String locationId) {
-    return _db
-        .collection('artifacts')
-        .where('locationId', isEqualTo: locationId)
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Artifact.fromFirestore(doc)).toList());
+    final key = locationId.trim();
+    if (key.isEmpty) {
+      return Stream.value([]);
+    }
+
+    final locRef = _db.collection('locations').doc(key);
+
+    return Stream.multi((controller) {
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> latest1 = [];
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> latest2 = [];
+
+      int tsMillis(Map<String, dynamic>? d, String field) {
+        final v = d?[field];
+        if (v is Timestamp) return v.millisecondsSinceEpoch;
+        if (v is String) {
+          final parsed = DateTime.tryParse(v);
+          if (parsed != null) return parsed.millisecondsSinceEpoch;
+        }
+        return 0;
+      }
+
+      void emit() {
+        final merged = <String, QueryDocumentSnapshot<Map<String, dynamic>>>{};
+        for (final d in latest1) {
+          merged[d.id] = d;
+        }
+        for (final d in latest2) {
+          merged[d.id] = d;
+        }
+        var docs = merged.values.toList();
+        docs.sort((a, b) {
+          final da = a.data();
+          final db = b.data();
+          final ca = tsMillis(da, 'createdAt');
+          final cb = tsMillis(db, 'createdAt');
+          if (ca != cb) return cb.compareTo(ca);
+          final ua = tsMillis(da, 'updatedAt');
+          final ub = tsMillis(db, 'updatedAt');
+          return ub.compareTo(ua);
+        });
+
+        final list = <Artifact>[];
+        for (final doc in docs) {
+          try {
+            list.add(Artifact.fromFirestore(doc));
+          } catch (e, st) {
+            debugPrint('FirestoreService: skip artifact ${doc.id}: $e\n$st');
+          }
+        }
+
+        if (kDebugMode) {
+          debugPrint(
+            'Artifacts for location "$key": stringQuery=${latest1.length}, '
+            'refQuery=${latest2.length}, mergedDocs=${docs.length}, parsed=${list.length}',
+          );
+        }
+
+        controller.add(list);
+      }
+
+      final sub1 = _db
+          .collection('artifacts')
+          .where('locationId', isEqualTo: key)
+          .snapshots()
+          .listen(
+            (s) {
+              latest1 =
+                  List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(s.docs);
+              emit();
+            },
+            onError: controller.addError,
+          );
+
+      final sub2 = _db
+          .collection('artifacts')
+          .where('locationId', isEqualTo: locRef)
+          .snapshots()
+          .listen(
+            (s) {
+              latest2 =
+                  List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(s.docs);
+              emit();
+            },
+            onError: controller.addError,
+          );
+
+      controller.onCancel = () {
+        sub1.cancel();
+        sub2.cancel();
+      };
+    });
   }
 }
