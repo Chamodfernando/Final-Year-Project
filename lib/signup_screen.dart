@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'app_colors.dart';
-import 'dashboard_screen.dart';
+import 'services/user_profile_firestore_sync.dart';
+import 'main_shell_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -82,6 +83,8 @@ class _SignupScreenState extends State<SignupScreen> {
       // 2) Set displayName (so profile screen can use it)
       await user.updateDisplayName(name);
 
+      await UserProfileFirestoreSync.syncCurrentUser();
+
       if (!mounted) return;
 
       // 3) Stop loading *before* navigation
@@ -94,7 +97,7 @@ class _SignupScreenState extends State<SignupScreen> {
       // 4) Go straight to Dashboard, replacing signup screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => const DashboardScreen(),
+          builder: (_) => const MainShellScreen(),
         ),
       );
     } on FirebaseAuthException catch (e) {

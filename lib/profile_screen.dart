@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';   // ⬅️ NEW
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'app_colors.dart';
+import 'shell_nav.dart';
 import 'services/app_locale_controller.dart';
 import 'services/session_asset_cache_service.dart';
 import 'services/voice_narration_settings.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.onBackToHome});
+
+  /// When embedded in [MainShellScreen], returns to HOME reliably.
+  final VoidCallback? onBackToHome;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -238,7 +242,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: AppColors.primaryGreen,
                                   ),
                                   padding: EdgeInsets.zero,
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed: () {
+                                    if (widget.onBackToHome != null) {
+                                      widget.onBackToHome!();
+                                      return;
+                                    }
+                                    final shell = MainShellScope.maybeOf(context);
+                                    if (shell != null) {
+                                      shell.goHome();
+                                    } else {
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
                                 ),
                               ),
                               Text(

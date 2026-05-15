@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../app_colors.dart';
 import '../services/gemini_service.dart';
 
@@ -7,11 +9,20 @@ class AIChatPanel extends StatefulWidget {
   final String history;
   final List<String> quickFacts;
 
+  /// Bottom-sheet style (handle, rounded top, [Navigator.pop] close).
+  /// When true: flat full-height layout for tab/shell use — pass [onDismiss] to go home.
+  final bool embedAsFullPage;
+
+  /// Close action when [embedAsFullPage] is true (e.g. shell [goHome]).
+  final VoidCallback? onDismiss;
+
   const AIChatPanel({
     super.key,
     required this.artifactTitle,
     required this.history,
     required this.quickFacts,
+    this.embedAsFullPage = false,
+    this.onDismiss,
   });
 
   @override
@@ -115,8 +126,114 @@ class _AIChatPanelState extends State<AIChatPanel> {
     });
   }
 
+  static const Color _forest = Color(0xFF0C3B2E);
+
   @override
   Widget build(BuildContext context) {
+    if (widget.embedAsFullPage) {
+      return DecoratedBox(
+        decoration: const BoxDecoration(color: _forest),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 4, 0, 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome_rounded, color: Colors.amber, size: 22),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'AI guide',
+                        style: GoogleFonts.playfairDisplay(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(Icons.close_rounded, color: Colors.white, size: 26),
+                      tooltip: 'Close',
+                      onPressed: () {
+                        if (widget.onDismiss != null) {
+                          widget.onDismiss!();
+                        } else {
+                          Navigator.of(context).maybePop();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, thickness: 1, color: Colors.white12),
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    return _ChatBubble(message: _messages[index]);
+                  },
+                ),
+              ),
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Center(
+                    child: SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.amber,
+                      ),
+                    ),
+                  ),
+                ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.18),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Type your question…',
+                          hintStyle: const TextStyle(color: Colors.white38),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.08),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                        onSubmitted: (_) => _handleSend(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: _handleSend,
+                      icon: const Icon(Icons.send_rounded, color: Colors.amber),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.primaryGreen,

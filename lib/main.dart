@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,7 +9,7 @@ import 'firebase_options.dart';
 import 'app_colors.dart';
 import 'loading_screen.dart';
 import 'services/app_locale_controller.dart';
-import 'services/session_asset_cache_service.dart';
+import 'services/user_profile_firestore_sync.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,10 +33,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  DateTime? _foregroundStartedAt;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final s = WidgetsBinding.instance.lifecycleState;
+      if (s == AppLifecycleState.resumed) {
+        _foregroundStartedAt = DateTime.now();
+      }
+    });
   }
 
   @override
@@ -45,10 +56,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached) {
-      // Drop disk caches when the engine is torn down (e.g., app removed from
-      // recents). Navigation within the app never triggers this state.
-      SessionAssetCacheService.instance.clearSessionCache();
+    final now = DateTime.now();
+    if (state == AppLifecycleState.resumed) {
+      _foregroundStartedAt = now;
+      return;
+    }
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      final start = _foregroundStartedAt;
+      _foregroundStartedAt = null;
+      if (start != null) {
+        final d = now.difference(start);
+        unawaited(UserProfileFirestoreSync.recordForegroundSession(d));
+      }
     }
   }
 

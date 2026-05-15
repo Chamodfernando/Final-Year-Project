@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { dbService, storageService } from '../services/dbService';
 import { Plus, Box, Trash2, Edit, X, Image as ImageIcon, Loader2, Search } from 'lucide-react';
+import { AnimatedModal } from '../components/AnimatedModal';
 
 const Artifacts = () => {
     const [artifacts, setArtifacts] = useState([]);
@@ -336,9 +337,16 @@ const Artifacts = () => {
                 </div>
             )}
 
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="card modal-content wide-modal">
+            <AnimatedModal
+                open={showModal}
+                onClose={() => {
+                    if (!uploading) setShowModal(false);
+                }}
+                closeOnBackdrop={!uploading}
+                closeOnEscape={!uploading}
+                panelClassName="card modal-content wide-modal"
+                ariaLabel={currentArtifact ? 'Edit artifact' : 'Add artifact'}
+            >
                         <div className="modal-header">
                             <h3>{currentArtifact ? 'Edit Artifact' : 'Add New Artifact'}</h3>
                             <button
@@ -607,9 +615,7 @@ const Artifacts = () => {
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            )}
+            </AnimatedModal>
 
             <style>{`
         .page-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }

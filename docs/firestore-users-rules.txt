@@ -1,0 +1,101 @@
+================================================================================
+Firestore: add a `users` collection (for the admin Users tab + mobile app)
+================================================================================
+
+The `users` collection does NOT appear until at least one document is written.
+Your app writes `users/<uid>` when someone signs in / signs up / continues as
+guest — IF security rules allow it.
+
+For signed-in (non-guest) accounts, the mobile app may merge optional analytics
+fields on the same document (e.g. `totalForegroundMs`, `foregroundSessionCount`)
+when sessions end; the usual self-serve `users/{userId}` update rule applies.
+
+If your rules use a full-database wildcard like:
+
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
+then rules are NOT blocking the `users` collection. It is missing only because
+nothing has written a `users/<uid>` document yet (run the backfill or sign in
+on the app once).
+
+SECURITY: That pattern is fully public — tighten before production (see
+OPTIONAL section at the bottom of this file).
+
+OPTION A — One-time import from Firebase Authentication (fastest)
+--------------------------------------------------------------------------------
+From folder `admin_panel`, with a service account JSON path set:
+
+  npm run sync-auth-to-firestore
+
+This uses the Admin SDK and creates `users/<uid>` for every Auth user even if
+client rules would block the app.
+
+OPTION B — Let the mobile app create the first document
+--------------------------------------------------------------------------------
+1. Open Firebase Console → Firestore Database → Rules.
+2. Add the block below INSIDE your existing:
+
+     match /databases/{database}/documents {
+       ... your existing match /locations and match /artifacts ...
+     }
+
+   Do not delete your current rules unless you know what you are doing.
+
+3. Click Publish.
+4. Open the Ceylon Trails app, sign in (or Continue as guest), wait a few
+   seconds, refresh Firestore — you should see `users` with one document.
+
+Suggested rules block for `users` only:
+
+--- copy from next line ---
+    match /users/{userId} {
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+      allow delete: if true;
+    }
+--- stop before this line ---
+
+Notes:
+- `read: if true` lets the admin panel (localhost, no Firebase Auth) list
+  users. Tighten this in production (e.g. admin-only custom claims).
+- `delete: if true` lets the admin UI remove a Firestore profile only; it does
+  NOT remove the Firebase Authentication account.
+
+If writes still fail, check Logcat for lines starting with:
+  UserProfileFirestoreSync:
+
+================================================================================
+OPTIONAL — Stricter starter rules (replace the public wildcard before launch)
+================================================================================
+Only use after you understand how your admin panel and app authenticate.
+Admin Vite app often needs read (and maybe write) on locations/artifacts without
+Firebase Auth — you may need to add Firebase Auth for admins or use Cloud
+Functions for writes.
+
+    rules_version = '2';
+    service cloud.firestore {
+      match /databases/{database}/documents {
+
+        match /users/{userId} {
+          allow create, update: if request.auth != null && request.auth.uid == userId;
+          allow read, delete: if request.auth != null;
+        }
+
+        match /locations/{id} {
+          allow read: if request.auth != null;
+          allow write: if request.auth != null;
+        }
+
+        match /artifacts/{id} {
+          allow read: if request.auth != null;
+          allow write: if request.auth != null;
+        }
+      }
+    }
+
+If the admin panel must write locations without signing in, the above will
+block it until you add admin auth or adjust write conditions.
+
+================================================================================

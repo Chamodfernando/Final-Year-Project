@@ -44,7 +44,7 @@ class SessionAssetCacheService {
     return AssetImage(pathOrUrl);
   }
 
-  /// Clears downloaded `.glb` cache and remote images tracked this session (logout).
+  /// Clears downloaded `.glb` cache and remote images (e.g. profile / privacy action).
   Future<void> clearSessionCache() async {
     await CeylonGlbCacheManager().emptyCache();
     for (final url in _sessionUrls) {

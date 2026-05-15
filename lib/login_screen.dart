@@ -4,9 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'app_colors.dart';
+import 'services/user_profile_firestore_sync.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
-import 'dashboard_screen.dart';
+import 'main_shell_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -49,11 +50,13 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
+      await UserProfileFirestoreSync.syncCurrentUser();
+
       if (!mounted) return;
 
       // Navigate to dashboard and clear back stack
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const MainShellScreen()),
             (route) => false,
       );
     } on FirebaseAuthException catch (e) {

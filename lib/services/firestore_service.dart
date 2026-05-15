@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/location.dart';
+import '../models/location_city_option.dart';
 import '../models/artifact.dart';
 
 class FirestoreService {
@@ -23,6 +24,66 @@ class FirestoreService {
         debugPrint(
           'Firestore locations snapshot: ${snapshot.docs.length} docs, '
           '${list.length} parsed',
+        );
+      }
+      return list;
+    });
+  }
+
+  /// Locations whose `city` field equals [city] (trimmed). Empty [city] yields no stream listen.
+  Stream<List<Location>> streamLocationsByCity(String city) {
+    final c = city.trim();
+    if (c.isEmpty) {
+      return Stream.value([]);
+    }
+    return _db
+        .collection('locations')
+        .where('city', isEqualTo: c)
+        .snapshots()
+        .map((snapshot) {
+      final list = <Location>[];
+      for (final doc in snapshot.docs) {
+        try {
+          list.add(Location.fromFirestore(doc));
+        } catch (e, st) {
+          debugPrint('FirestoreService: skip location ${doc.id}: $e\n$st');
+        }
+      }
+      if (kDebugMode) {
+        debugPrint(
+          'Firestore locations by city "$c": ${snapshot.docs.length} docs, '
+          '${list.length} parsed',
+        );
+      }
+      return list;
+    });
+  }
+
+  /// Distinct non-empty `city` values from all locations, with counts, sorted A→Z.
+  Stream<List<LocationCityOption>> streamLocationCityOptions() {
+    return _db.collection('locations').snapshots().map((snapshot) {
+      final counts = <String, int>{};
+      for (final doc in snapshot.docs) {
+        try {
+          final loc = Location.fromFirestore(doc);
+          final c = loc.city.trim();
+          if (c.isEmpty) continue;
+          counts[c] = (counts[c] ?? 0) + 1;
+        } catch (e, st) {
+          debugPrint('FirestoreService: skip location ${doc.id} for city list: $e\n$st');
+        }
+      }
+      final list = counts.entries
+          .map(
+            (e) => LocationCityOption(city: e.key, locationCount: e.value),
+          )
+          .toList()
+        ..sort(
+          (a, b) => a.city.toLowerCase().compareTo(b.city.toLowerCase()),
+        );
+      if (kDebugMode) {
+        debugPrint(
+          'Firestore city options: ${snapshot.docs.length} docs → ${list.length} cities',
         );
       }
       return list;

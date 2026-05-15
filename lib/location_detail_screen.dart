@@ -1,12 +1,117 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 import 'artifact_detail_screen.dart';
 import 'models/artifact.dart' as model;
+import 'models/location.dart';
 import 'services/firestore_service.dart';
+import 'services/maps_directions_service.dart';
+
+Future<void> _openGoogleDirectionsForLocation(
+  BuildContext context, {
+  required String locationId,
+  required String title,
+  required String city,
+  required String district,
+  required double? latitude,
+  required double? longitude,
+}) async {
+  double? lat = latitude;
+  double? lng = longitude;
+
+  final id = locationId.trim();
+  // When the list/detail already has coords, skip Firestore — those reads delay opening Maps.
+  if (id.isNotEmpty && (lat == null || lng == null)) {
+    try {
+      final ref = FirebaseFirestore.instance.collection('locations').doc(id);
+      // Prefer local cache first (same data the locations stream already merged).
+      // Forcing Source.server often fails on flaky networks (timeouts) and can skip
+      // fresh listener state — see Firestore "Could not reach ... backend" logs.
+      DocumentSnapshot<Map<String, dynamic>> snap;
+      try {
+        snap = await ref.get(const GetOptions(source: Source.cache));
+      } catch (_) {
+        snap = await ref.get();
+      }
+      if (snap.exists) {
+        final loc = Location.fromFirestore(snap);
+        lat = loc.latitude ?? lat;
+        lng = loc.longitude ?? lng;
+      }
+      if (lat == null || lng == null) {
+        final snap2 = await ref.get();
+        if (snap2.exists) {
+          final loc2 = Location.fromFirestore(snap2);
+          lat = loc2.latitude ?? lat;
+          lng = loc2.longitude ?? lng;
+        }
+      }
+    } catch (e, st) {
+      assert(() {
+        debugPrint('Directions: could not load locations/$id: $e\n$st');
+        return true;
+      }());
+    }
+  }
+
+  if (lat == null || lng == null) {
+    if (kDebugMode) {
+      debugPrint(
+        'Directions: no lat/lng for id="$id". '
+        'If you added coords in Firebase, open the **same** document id the app uses '
+        '(watch for capital I vs lowercase l in the id). Trying Maps by place name…',
+      );
+    }
+    final placeParts = <String>[
+      if (title.trim().isNotEmpty) title.trim(),
+      if (city.trim().isNotEmpty) city.trim(),
+      if (district.trim().isNotEmpty) district.trim(),
+      'Sri Lanka',
+    ];
+    final placeQuery = placeParts.join(', ');
+    final openedByName = await MapsDirectionsService.openGoogleMapsDirectionsToPlaceQuery(
+      destinationQuery: placeQuery,
+    );
+    if (openedByName) {
+      return;
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          id.isEmpty
+              ? 'Add latitude and longitude in Firestore for this place, or check your network.'
+              : 'No coordinates for this place in the database. In Firebase Console, '
+                    'open locations → document id:\n$id\nand add number fields latitude and longitude. '
+                    'Check the letter I vs l in the id if you already added coords elsewhere.',
+        ),
+      ),
+    );
+    return;
+  }
+
+  // Omit origin: Geolocator.getCurrentPosition often blocks several seconds; Google Maps
+  // uses the device’s current location when [origin] is not in the URL.
+  final opened = await MapsDirectionsService.openGoogleMapsDirections(
+    destinationLatitude: lat,
+    destinationLongitude: lng,
+  );
+  if (context.mounted && !opened) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not open Google Maps. Check that the app is installed.'),
+      ),
+    );
+  }
+}
 
 class LocationDetailScreen extends StatelessWidget {
   final String id;
   final String title;
+  /// Primary city / town (from admin).
+  final String city;
   final String district;
   final String description; // short summary if you ever need it
   final String history; // full history text shown under "History"
@@ -15,10 +120,15 @@ class LocationDetailScreen extends StatelessWidget {
   final String distanceText;
   final double rating;
 
+  /// WGS84 from Firestore — required for Google Maps directions.
+  final double? latitude;
+  final double? longitude;
+
   const LocationDetailScreen({
     super.key,
     required this.id,
     required this.title,
+    this.city = '',
     required this.district,
     required this.description,
     required this.history,
@@ -26,6 +136,8 @@ class LocationDetailScreen extends StatelessWidget {
     required this.tags,
     this.distanceText = '15 km away',
     this.rating = 4.8,
+    this.latitude,
+    this.longitude,
   });
 
   @override
@@ -128,9 +240,11 @@ class LocationDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // District
+                          // City + district
                           Text(
-                            district,
+                            city.trim().isEmpty
+                                ? district
+                                : '${city.trim()} · $district',
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -175,6 +289,36 @@ class LocationDetailScreen extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 12),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryGreen,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: const Icon(Icons.directions_rounded, size: 22),
+                              label: const Text(
+                                'Directions in Google Maps',
+                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                              ),
+                              onPressed: () => _openGoogleDirectionsForLocation(
+                                context,
+                                locationId: id,
+                                title: title,
+                                city: city,
+                                district: district,
+                                latitude: latitude,
+                                longitude: longitude,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
 
                           // Tags
                           Wrap(

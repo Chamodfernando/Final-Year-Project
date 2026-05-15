@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'app_colors.dart';
-import 'dashboard_screen.dart';
 import 'login_screen.dart';
+import 'main_shell_screen.dart';
+import 'services/user_profile_firestore_sync.dart';
 
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
@@ -160,9 +162,10 @@ class _BottomSectionState extends State<_BottomSection> {
           }
         }
       }
+      await UserProfileFirestoreSync.syncCurrentUser();
       if (!context.mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const MainShellScreen()),
         (route) => false,
       );
     } catch (e) {

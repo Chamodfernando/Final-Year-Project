@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { dbService, storageService } from '../services/dbService';
+import { SRI_LANKA_CITIES } from '../constants/sriLankaCities';
 import { Plus, MapPin, Star, Trash2, Edit, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { AnimatedModal } from '../components/AnimatedModal';
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -14,7 +16,10 @@ const Locations = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
+    city: '',
     district: '',
+    latitude: '',
+    longitude: '',
     description: '',
     imagePath: '',
     tags: '',
@@ -66,7 +71,10 @@ const Locations = () => {
       setCurrentLocation(location);
       setFormData({
         title: location.title || '',
+        city: location.city || '',
         district: location.district || '',
+        latitude: location.latitude != null && location.latitude !== '' ? String(location.latitude) : '',
+        longitude: location.longitude != null && location.longitude !== '' ? String(location.longitude) : '',
         description: location.description || '',
         imagePath: location.imagePath || '',
         tags: Array.isArray(location.tags) ? location.tags.join(', ') : (location.tags || ''),
@@ -77,7 +85,10 @@ const Locations = () => {
       setCurrentLocation(null);
       setFormData({
         title: '',
+        city: '',
         district: '',
+        latitude: '',
+        longitude: '',
         description: '',
         imagePath: '',
         tags: '',
@@ -101,6 +112,11 @@ const Locations = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const cityTrim = String(formData.city || '').trim();
+    if (!cityTrim) {
+      alert('Please select the city where this location is situated.');
+      return;
+    }
     setUploading(true);
     let finalImagePath = formData.imagePath;
 
@@ -113,6 +129,7 @@ const Locations = () => {
       const ratingValue = parseFloat(formData.rating);
       const dataToSave = {
         title: formData.title,
+        city: cityTrim,
         district: formData.district,
         description: formData.description,
         imagePath: finalImagePath,
@@ -120,6 +137,17 @@ const Locations = () => {
         rating: isNaN(ratingValue) ? 0 : ratingValue,
         updatedAt: new Date().toISOString()
       };
+
+      const latStr = String(formData.latitude || '').trim();
+      const lngStr = String(formData.longitude || '').trim();
+      if (latStr !== '' && lngStr !== '') {
+        const lat = parseFloat(latStr);
+        const lng = parseFloat(lngStr);
+        if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+          dataToSave.latitude = lat;
+          dataToSave.longitude = lng;
+        }
+      }
 
       if (currentLocation) {
         await dbService.update("locations", currentLocation.id, dataToSave);
@@ -278,7 +306,10 @@ const Locations = () => {
                 <h3 className="location-title">{loc.title}</h3>
                 <div className="location-meta">
                   <MapPin size={14} />
-                  <span>{loc.district}</span>
+                  <span>
+                    {loc.city ? <><strong className="city-label">{loc.city}</strong> · </> : null}
+                    {loc.district}
+                  </span>
                 </div>
                 <div className="location-rating">
                   <Star size={14} fill="#f59e0b" color="#f59e0b" />
@@ -306,9 +337,16 @@ const Locations = () => {
       )}
 
       {/* Location Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="card modal-content">
+      <AnimatedModal
+        open={showModal}
+        onClose={() => {
+          if (!uploading) setShowModal(false);
+        }}
+        closeOnBackdrop={!uploading}
+        closeOnEscape={!uploading}
+        panelClassName="card modal-content"
+        ariaLabel={currentLocation ? 'Edit location' : 'Add location'}
+      >
             <div className="modal-header">
               <h3>{currentLocation ? 'Edit Location' : 'Add New Location'}</h3>
               <button className="close-btn" onClick={() => setShowModal(false)} disabled={uploading}><X size={20} /></button>
@@ -354,6 +392,32 @@ const Locations = () => {
               </div>
 
               <div className="form-group">
+                <label className="label">City / town</label>
+                <select
+                  className="input select-field"
+                  required
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                >
+                  <option value="" disabled>
+                    Select city…
+                  </option>
+                  {currentLocation?.city &&
+                    !SRI_LANKA_CITIES.includes(currentLocation.city) && (
+                      <option value={currentLocation.city}>
+                        {currentLocation.city} (saved value — pick from list or keep)
+                      </option>
+                    )}
+                  {SRI_LANKA_CITIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <p className="field-help">Where this heritage site is located (edit list in <code>src/constants/sriLankaCities.js</code>).</p>
+              </div>
+
+              <div className="form-group">
                 <label className="label">District & Province</label>
                 <input
                   type="text"
@@ -364,6 +428,29 @@ const Locations = () => {
                   placeholder="e.g. Dambulla, Central Province"
                 />
               </div>
+              <div className="form-group">
+                <label className="label">Map coordinates (for Google Maps directions)</label>
+                <div className="form-row">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    className="input"
+                    value={formData.latitude}
+                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                    placeholder="Latitude e.g. 7.9570"
+                  />
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    className="input"
+                    value={formData.longitude}
+                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                    placeholder="Longitude e.g. 80.7603"
+                  />
+                </div>
+                <p className="field-help">WGS84 decimal degrees. Both required for the in-app &quot;Directions&quot; button.</p>
+              </div>
+
               <div className="form-group">
                 <label className="label">Description / History</label>
                 <textarea
@@ -404,14 +491,19 @@ const Locations = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </AnimatedModal>
 
       {/* Artifact Modal */}
-      {showArtifactModal && (
-        <div className="modal-overlay">
-          <div className="card modal-content wide-modal">
+      <AnimatedModal
+        open={showArtifactModal}
+        onClose={() => {
+          if (!artifactUploading) setShowArtifactModal(false);
+        }}
+        closeOnBackdrop={!artifactUploading}
+        closeOnEscape={!artifactUploading}
+        panelClassName="card modal-content wide-modal"
+        ariaLabel="Add artifact for site"
+      >
             <div className="modal-header">
               <div>
                 <h3>Add Artifact for Site</h3>
@@ -594,9 +686,7 @@ const Locations = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </AnimatedModal>
 
       <style>{`
         .loading-state { text-align: center; padding: 40px; color: var(--text-muted); }
@@ -650,6 +740,9 @@ const Locations = () => {
         .preview-box.small { height: 100px; }
         .file-name-hint { font-size: 11px; color: var(--primary); margin-top: 4px; }
         .field-help { font-size: 12px; color: var(--text-muted); margin: 0 0 6px 0; line-height: 1.35; }
+        .field-help code { font-size: 11px; background: #f1f5f9; padding: 1px 6px; border-radius: 4px; }
+        .select-field { cursor: pointer; background: #fff; }
+        .city-label { font-weight: 700; color: var(--primary); }
       `}</style>
     </div>
   );
